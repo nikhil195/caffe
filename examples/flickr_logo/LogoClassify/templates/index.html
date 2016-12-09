@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    
+                    <a class="navbar-brand page-scroll" href="#page-top">Logo Classify</a>
+                </div>
+
+                
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
+        <div class="container">
+            <div id="content">
+
+                    
+                    <div class="row" style="margin-top:100px;">
+                        <div class="col-xs-offset-5 col-xs-6">
+                           <input type="file" id="fileinput" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col-xs-offset-2 col-xs-8 image-div">
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col-xs-offset-2 col-xs-8 logo-class" >
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col-xs-offset-2 col-xs-8">
+                            <button type="button" class="btn btn-primary form-control" id="btn-upload-image" >Upload Image</button>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col-xs-offset-2 col-xs-8">
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-addon glyphicon glyphicon-link" id="sizing-addon1"></span>
+                                <input type="text" class="form-control input-field" placeholder="Image Url" aria-describedby="sizing-addon1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col-xs-offset-2 col-xs-8 url-img">
+                            
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col-xs-offset-2 col-xs-8 url-logo-class" >
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:15px;">
+                        <div class="col-xs-offset-2 col-xs-8">
+                            <button type="button" class="btn btn-primary form-control" id="btn-submit-url">Submit Url</button>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        
+        <script type="text/javascript">
+            $("#btn-upload-image").click( function(e) {
+                console.log( "print sending post request" )
+                for (var i = 0; i < document.getElementById('fileinput').files.length; i++) {
+        
+                    var file = document.getElementById('fileinput').files[i];
+        
+                    var formdata = new FormData();
+                    formdata.append('file_upload', file);
+                    $.ajax({
+                            url: 'http://localhost:8000/uploadImage/',
+                            type: 'POST',
+                            data: formdata,
+                            processData: false,
+                            contentType: false,
+
+                    }).done( function( msg ){
+                                var result = JSON.parse( msg );
+                                $(".logo-class").empty();
+                                var heading = $('<h3/>').html('Predicted Logo for Chosen Image is: ' + '<b>' + result.logo + '</b>' );
+                                $(".logo-class").append( heading );
+                                var heading = $('<h3/>').html('Other Tags: ' );
+                                $(".logo-class").append( heading );
+                                result.otherInfo.forEach( function( content ){
+                                    var heading = $('<h4/>').html('Tag: ' + content[0] + ' Score: ' + content[1]);
+                                    $(".logo-class").append( heading );
+                                    } );
+                        });
+                }
+            } );
+            $("#btn-submit-url").click( function(e) {
+                $(".image-div").empty();
+                $(".logo-class").empty();
+                console.log( "print sending url request" )
+                console.log( $('.input-field').val() )
+                $('.url-img').empty();
+                $(".url-logo-class").empty();
+                var frame = $('<img />', {
+                    'src': $('.input-field').val(),
+                    'class': 'img-fluid'
+                });
+                $('.url-img').append( frame );
+
+                $.post( 'http://localhost:8000/submitUrl/', { url: $('.input-field').val() })
+                    .done( function( msg ){
+                        var result = JSON.parse( msg );
+                        $(".url-logo-class").empty();
+                        var heading = $('<h3/>').html('Predicted Logo for Chosen Image is: ' + '<b>' + result.logo + '</b>' );
+                        $(".url-logo-class").append( heading );
+                        var heading = $('<h3/>').html('Other Tags: ' );
+                        $(".url-logo-class").append( heading );
+                        result.otherInfo.forEach( function( content ){
+                        var heading = $('<h4/>').html('Tag: ' + content[0] + ' Score: ' + content[1]);
+                        $(".url-logo-class").append( heading );
+                    } );
+                });
+            } );
+
+            $("#fileinput").change(function(e) {
+                $('.url-img').empty();
+                $(".url-logo-class").empty();
+                $('.input-field').val('');
+                for (var i = 0; i < e.originalEvent.srcElement.files.length; i++) {
+        
+                    var file = e.originalEvent.srcElement.files[i];
+        
+                    var img;
+                    var reader = new FileReader();
+                    reader.onloadend = function() {
+                        $(".image-div").empty();
+                        $(".logo-class").empty();
+                        img = $('<img />', {
+                                'src': reader.result,
+                                'class': 'img-fluid'
+                                });
+                        $(".image-div").append( img );
+                        
+                    }
+                    reader.readAsDataURL(file);
+                }
+
+            } );
+                    
+   
+            
+        </script>
+    </body>
+</html>
