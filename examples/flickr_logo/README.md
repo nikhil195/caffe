@@ -6,7 +6,7 @@ Following libraries need to be installed:
 
 2. Tensoflow (https://www.tensorflow.org/versions/r0.12/get_started/os_setup.html#download-and-setup)
 
-3. Django ??
+3. Django
 
 
 Run UI Application:
